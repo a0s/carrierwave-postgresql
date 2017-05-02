@@ -16,9 +16,10 @@ module CarrierWave
           end
         end
 
-        def write(file)
+        def write(file, oid = nil)
+          @oid = oid || identifier
           @uploader.model.transaction do
-            lo = connection.lo_open(identifier, ::PG::INV_WRITE)
+            lo = connection.lo_open(@oid, ::PG::INV_WRITE)
             connection.lo_truncate(lo, 0)
             size = connection.lo_write(lo, file.read)
             connection.lo_close(lo)
@@ -26,8 +27,9 @@ module CarrierWave
           end
         end
 
-        def delete
-          connection.lo_unlink(identifier)
+        def delete(oid = nil)
+          @oid = oid || identifier
+          connection.lo_unlink(@oid)
         end
 
         def file_length
