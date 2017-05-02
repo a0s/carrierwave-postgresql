@@ -4,6 +4,38 @@ This gem adds to [CarrierWave](https://github.com/jnicklas/carrierwave/) a stora
 
 For more information on PostgreSQL Large Objects you can take a look at the [official docs](http://www.postgresql.org/docs/9.2/static/largeobjects.html)
 
+## Act as cache_storage
+
+Enable postgres cache_storage:
+```ruby
+# config/initializers/carrierwave.rb
+
+require 'carrierwave/postgresql'
+CarrierWave.configure do |config|
+  config.cache_storage = :postgresql_lo
+end
+```
+
+Add table for storage cache:
+```ruby
+# 20170428123701_create_carrierwave_postgresql_cache.rb
+
+class CreateCarrierwavePostgresqlCache < ActiveRecord::Migration
+  def change
+    create_table :carrierwave_postgresql_caches, id: false do |t|
+      t.string :key, null: false
+      t.integer :oid, null: false
+      t.integer :size, null: false
+      t.timestamps
+      t.index :key, unique: true
+      t.index :oid, unique: true
+    end
+  end
+end
+```
+
+!!! Simultaneous use carrierwave-postgresql as :storage and :cache_storage is not tested !!!
+
 ## Note about 0.2.0
 
 This version drops support for ruby 1.9. If you use this version you should stick to 0.1.5.
